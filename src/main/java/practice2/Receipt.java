@@ -13,11 +13,13 @@ public class Receipt {
     }
 
     public double CalculateGrandTotal(List<Product> products, List<OrderItem> items) {
-        BigDecimal subTotal = calculateSubtotal(products, items);
+        BigDecimal subTotal = new BigDecimal(0.0);
 
         for (Product product : products) {
 
-            subTotal = subTotal.subtract(EachReduce(product, items));
+            subTotal = calculateEachSub(product, items, subTotal);
+
+            subTotal = subTotal.subtract(calculateEachReduce(product, items));
         }
         BigDecimal taxTotal = subTotal.multiply(tax);
         BigDecimal grandTotal = subTotal.add(taxTotal);
@@ -25,7 +27,7 @@ public class Receipt {
         return grandTotal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
-    private BigDecimal EachReduce(Product product, List<OrderItem> items){
+    private BigDecimal calculateEachReduce(Product product, List<OrderItem> items){
 
         OrderItem curItem = findOrderItemByProduct(items, product);
 
@@ -47,13 +49,12 @@ public class Receipt {
         return curItem;
     }
 
-    private BigDecimal calculateSubtotal(List<Product> products, List<OrderItem> items) {
-        BigDecimal subTotal = new BigDecimal(0);
-        for (Product product : products) {
+    private BigDecimal calculateEachSub(Product product, List<OrderItem> items, BigDecimal subTotal) {
+
             OrderItem item = findOrderItemByProduct(items, product);
             BigDecimal itemTotal = product.getPrice().multiply(new BigDecimal(item.getCount()));
             subTotal = subTotal.add(itemTotal);
-        }
+
         return subTotal;
     }
 }
